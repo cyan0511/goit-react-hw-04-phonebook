@@ -1,67 +1,46 @@
-import { Component } from 'react';
 import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
 import { Filter } from './Filter/Filter';
+import { useEffect, useState } from 'react';
 
-export class App extends Component {
-  state = {
-    contacts: [
+export function App() {
+  const storedContacts =  localStorage.getItem('contacts');
+
+  const [contacts, setContacts]  = useState(
+    (storedContacts ? JSON.parse(storedContacts) : null) || [
       { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
       { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
       { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
       { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-    findBy: 'name',
+    ]);
+
+  const [filter, setFilter] = useState('');
+  const [findBy, setFindBy] = useState('name');
+
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const addContact = newContact => {
+    setContacts( [...contacts, newContact]);
+    localStorage.setItem('contacts', JSON.stringify(contacts));
   };
 
-  componentDidMount() {
-    const savedContacts = localStorage.getItem('contacts');
-    if (savedContacts !== null) {
-      this.setState({ contacts: JSON.parse(savedContacts) });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-
-    if (contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-  }
-
-
-  addContact = newContact => {
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, newContact],
-    }));
+  const deleteContact = id => {
+    setContacts(contacts.filter(contact => contact.id !== id));
   };
 
-  deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
+  const searchContact = fieldName => searchString => {
+    setFilter(searchString);
+     setFindBy(fieldName);
   };
 
-  searchContact = fieldName => searchString => {
-    this.setState(prevState => ({
-      ...prevState,
-      filter: searchString,
-      findBy: fieldName,
-    })
-  )};
-
-  handleFindBy = e => {
+  const handleFindBy = e => {
     e.preventDefault();
-    this.setState(prevState => ({
-      ...prevState,
-      findBy: prevState.findBy === 'name' ? 'number' : 'name'
-    }));
+    setFindBy(findBy === 'name' ? 'number' : 'name');
   };
 
-  render() {
-    const { contacts, filter, findBy } = this.state;
-    const contactList = contacts
+  const contactList = contacts
       .filter(c => findBy === '' ||  c[findBy].toLowerCase().includes(filter));
 
     return (
@@ -70,18 +49,18 @@ export class App extends Component {
         <div className="phonebook-container">
           <div>
           <h2>New Contact</h2>
-          <ContactForm addContact={this.addContact} contacts={contacts} />
+          <ContactForm addContact={addContact} contacts={contacts} />
           </div>
           <div>
             <h2>Contacts</h2>
             <div style={{display: 'flex', flexDirection: 'row'}}>
-            <button type="button" style={{ width: '75px' }} onClick={this.handleFindBy}>{findBy === 'name' ? 'ABC' : '123'}</button>
-            <Filter by={findBy} searchContact={this.searchContact} />
+            <button type="button" style={{ width: '75px' }} onClick={handleFindBy}>{findBy === 'name' ? 'ABC' : '123'}</button>
+            <Filter by={findBy} searchContact={searchContact} />
             </div>
-            <ContactList contacts={contactList} deleteContact={this.deleteContact} />
+            <ContactList contacts={contactList} deleteContact={deleteContact} />
           </div>
         </div>
       </div>
     );
-  }
+
 }

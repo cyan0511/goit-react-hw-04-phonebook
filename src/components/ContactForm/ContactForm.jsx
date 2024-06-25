@@ -1,33 +1,22 @@
-import { Component } from 'react';
 import { nanoid } from 'nanoid';
 import css from './ContactForm.module.css';
+import { useState } from 'react';
 
-export class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
+export function ContactForm({ addContact, contacts }) {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+
+  const handleNameChange = e => {
+    setName(e.target.value);
   };
 
-  handleNameChange = e => {
-    // implement this method
-    this.setState({
-      name: e.target.value,
-    });
+  const handleNumberChange = e => {
+    setNumber(e.target.value);
   };
 
-  handleNumberChange = e => {
-    // implement this method
-    this.setState({
-      number: e.target.value,
-    });
-  };
-
-  handleSubmit = e => {
-    // implement this method
+  const handleSubmit = e => {
     // prevent the form from refreshing when submitted
     e.preventDefault();
-    const { name, number } = this.state;
-    const { addContact, contacts } = this.props;
 
     // if name and number is empty, it will not submit(return)
     if (name.trim() === '' || number.trim() === '') {
@@ -49,18 +38,13 @@ export class ContactForm extends Component {
       number: number.trim(),
     });
 
-    this.setState({
-      name: '',
-      number: '',
-    });
+    setName('');
+    setNumber('');
   };
-
-  render() {
-    const { name, number } = this.state;
 
     return (
       <div className={css['contact-form']}>
-      <form  onSubmit={this.handleSubmit}>
+      <form  onSubmit={handleSubmit}>
         <label>
           <p>Name</p>
           <input
@@ -72,7 +56,7 @@ export class ContactForm extends Component {
             required
             //must have value prop when onChange prop is used
             value={name}
-            onChange={this.handleNameChange}
+            onChange={handleNameChange}
           />
         </label>
 
@@ -87,7 +71,7 @@ export class ContactForm extends Component {
             required
             //must have value prop when onChange prop is used
             value={number}
-            onChange={this.handleNumberChange}
+            onChange={handleNumberChange}
           />
         </label>
 
@@ -95,5 +79,4 @@ export class ContactForm extends Component {
       </form>
       </div>
     );
-  }
 }
